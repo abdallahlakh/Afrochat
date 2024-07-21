@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Audio Speech To Sign Language Converter
 
 A Web Application which takes in live audio speech recording as input, converts it into text and displays the relevant Indian Sign Language animations.
@@ -28,3 +29,6 @@ These instructions will get you download the project and running on your local m
 4. Sign up and start exploring.
 5. Click on mic button to record speech.
 6. Speech is going to processed and respective animated outputs are shown accordingly and it also support entered text manually.
+=======
+###
+>>>>>>> origin/second_fonc
