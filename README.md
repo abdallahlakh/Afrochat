@@ -1,5 +1,5 @@
 # Project Title Sign Language for learning purpose
-the first fonctionalite explained in this video:
+the first fonctionalite consiste of adding the translation of learning resources videos,books.... with sign language explained in animation ,this is demo video that explain it....:
 
 ![Example Video](first_fonc.mp4)
 <br><br><br><br>
