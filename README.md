@@ -1,6 +1,6 @@
 # Project Title Sign Language for learning purpose
-
-This is the first fonctionalite of the project openai chatbot with sign language input and resposne # output # with sign language animation.
+the first fonctionalite explained in this video:
+This is the second fonctionalite of the project openai chatbot with sign language input and resposne # output # with sign language animation.
 
 ## Images
 
