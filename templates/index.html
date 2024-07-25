@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Language Detector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            justify-content: center; 
+            background-color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        #video-container, #chat-container, .split.right, .video-overlay-container {
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin: 10px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        h1, h2 {
+            color: #333;
+            font-weight: 600;
+        }
+        #chatbox, button, input[type="text"], input[type="submit"], video {
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        button, input[type="text"], input[type="submit"] {
+            padding: 12px;
+            border: none;
+            margin: 10px 0;
+            width: 100%;
+        }
+        button {
+            background-color: #ffd700;
+            color: #333;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #cca300;
+        }
+        input[type="text"], input[type="submit"] {
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .inline-list {
+    display: flex; /* This will align the list items in a row */
+    flex-wrap: wrap; /* This allows the list items to wrap onto the next line if there's not enough space */
+    padding: 0; /* Removes padding to align items properly */
+    margin: 0; /* Removes margin to align items properly */
+    list-style-type: none; /* Removes default list styling */
+    justify-content: center; /* Centers the items horizontally */
+    gap: 10px; /* Adds some space between the items */
+}
+
+.inline-list li {
+    background-color: #cca300;
+    color: #ffffff;
+    padding: 8px 16px;
+    margin: 5px; /* Adjusted to add space between items */
+    border-radius: 20px;
+    list-style-type: none;
+    white-space: nowrap; /* Prevents the text within from wrapping */
+}
+        @media (max-width: 768px) {
+            body {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* Add animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        #video-container, #chat-container, .split.right, .video-overlay-container {
+            animation: fadeIn 1s;
+            background-color: #444; /* Slightly lighter gray than the body for some contrast */
+            color: #fff;
+        }
+        #videoPlayer {
+    max-width: 80%; /* Increase the video size */
+    /* You can also use 'width: 80vw;' to make it responsive based on the viewport width */
+}
+    </style>
+</head>
+<body>
+    <div id="video-container">
+        <img src="{% url 'video_feed' %}" style="width: 100%; max-width: 600px; height: auto;">
+        <button id="finishSession">Show my input</button>
+        <input type="text" id="userInput" placeholder="Input.....">
+        <button id="sendQuery">Send to gpt :) </button>
+        <form action="" method="post">
+            {% csrf_token %}
+            <input type="submit" name="submit" value="Prepare response :)">
+        </form>
+    </div>
+    <div class="video-overlay-container">
+        <div class="split right">
+            <button onclick="playPause()">Play/Pause</button>
+            <video id="videoPlayer" style="width: 180%; max-width: 80%; height: auto;" preload="auto" autoplay>
+    <source src="" type="video/mp4">
+    Your browser does not support HTML5 video.
+</video>
+        </div>
+        <ul id="list" class="inline-list overlay-list">
+            {% for word in words %}
+            <li>{{ word }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <table>
+    </table>
+</body>
+</html>
+
+    <script>
+        $(document).ready(function() {
+            $('#sendQuery').click(function() {
+                var userInput = $('#userInput').val();
+                $.post('/chat/', {userInput: userInput}, function(data) {
+                    $('#chatbox').append('<div>User: ' + userInput + '</div>');
+                    $('#chatbox').append('<div>AI: ' + data.response + '</div>');
+                    $('#userInput').val(''); // Clear input box
+                });
+            });
+        });
+document.addEventListener('keydown', function(event) {
+    if (event.key === "Enter") {
+        // Use Fetch API to send a request to the server
+        fetch("{% url 'save_character' %}", {
+            method: 'POST', // or 'GET' if you're not sending data
+            headers: {
+                // Include CSRF token in the headers if making a POST request
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({/* Data to send, if any */}),
+            credentials: 'same-origin' // Include cookies
+        }).then(response => response.json())
+          .then(data => {
+            // Assuming 'data' contains the sentence or character you want to add to the list
+            const sentenceToAdd = JSON.stringify(data); // Convert the data to a JSON string
+
+            // Retrieve the existing list from localStorage, or initialize an empty list if none exists
+            let sentencesList = JSON.parse(localStorage.getItem('sentencesList')) || [];
+
+            // Add the new sentence to the list
+            sentencesList.push(sentenceToAdd);
+
+            // Save the updated list back to localStorage
+            localStorage.setItem('sentencesList', JSON.stringify(sentencesList));
+                     })
+          .catch(error => console.error('Error:', error));
+    }
+});
+let sentence = ''; // Initialize an empty string to accumulate characters
+
+document.addEventListener('keydown', function(event) {
+    if (event.key !== "/") {
+        // Append the character to the sentence if it's not the "Enter" key
+        sentence += event.key;
+    } else {
+        // When "Enter" is pressed, send the sentence to the server
+        fetch("{% url 'save_character' %}", { // Replace with your actual endpoint URL
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // 'X-CSRFToken': 'YOUR_CSRF_TOKEN_HERE', // Uncomment and replace with your CSRF token if needed
+            },
+            body: JSON.stringify({sentence: sentence}), // Send the accumulated sentence
+            credentials: 'same-origin'
+        }).then(response => response.json())
+          .then(data => {
+              console.log(data);
+              // Save the received data in localStorage
+              localStorage.setItem('lastSentence', JSON.stringify(data));
+              sentence = ''; // Reset the sentence for the next input
+          })
+          .catch(error => console.error('Error:', error));
+    }
+});
+document.getElementById('finishSession').addEventListener('click', function() {
+    // Retrieve the user's input from localStorage
+    let userInputs = JSON.parse(localStorage.getItem('sentencesList')) || [];
+    
+    // Clean the data and extract characters to form a sentence
+    let sentence = userInputs.map(item => {
+        // Assuming each item is an object with a 'character' key
+        let parsedItem = JSON.parse(item); // Parse each item in case it's stored as a stringified JSON
+        return parsedItem.character;
+    }).join(''); // Join without spaces for continuous sentence; add a space in join(' ') for spaced words
+    
+    // Set the value of the userInput input field to the formed sentence
+    document.getElementById('userInput').value = sentence;
+});
+function record(){
+        var recognition = new webkitSpeechRecognition();
+        recognition.lang='en-IN';
+
+        recognition.onresult = function(event){
+            console.log(event)
+            document.getElementById('speechToText').value = event.results[0][0].transcript;
+        }
+        recognition.start();
+     }
+    function play()
+    {
+        var videoSource = new Array();
+        var	videos = document.getElementById("list").getElementsByTagName("li");
+        var j;
+        for(j=0;j<videos.length;j++)
+        {
+            videoSource[j] = "/static/" + videos[j].innerHTML +".mp4";
+        }
+
+        var i = 0; // define i
+        var videoCount = videoSource.length;
+
+        function videoPlay(videoNum)
+        {
+            document.getElementById("list").getElementsByTagName("li")[videoNum].style.color = "#09edc7";
+            document.getElementById("list").getElementsByTagName("li")[videoNum].style.fontSize = "xx-large";
+            document.getElementById("videoPlayer").setAttribute("src", videoSource[videoNum]);
+        	document.getElementById("videoPlayer").load();
+        	document.getElementById("videoPlayer").play();
+
+        }
+        document.getElementById('videoPlayer').addEventListener('ended', myHandler, false);
+        document.getElementById("list").getElementsByTagName("li")[0].style.color = "#09edc7";
+        document.getElementById("list").getElementsByTagName("li")[0].style.fontSize = "xx-large";
+
+        videoPlay(0); // play the video
+
+        function myHandler()
+        {
+     		document.getElementById("list").getElementsByTagName("li")[i].style.color = "#feda6a";
+            document.getElementById("list").getElementsByTagName("li")[i].style.fontSize = "20px";
+            i++;
+        	if (i == videoCount)
+        	{
+           	    document.getElementById("videoPlayer").pause();
+        	}
+         	else
+         	{
+            	videoPlay(i);
+        	}
+        }
+    }
+    function playPause(){
+          if (document.getElementById("videoPlayer").paused){
+            play();}
+          else{
+            document.getElementById("videoPlayer").pause();}
+        }
+
+    </script>
+    
+</body>
+</html>
