@@ -1,8 +1,8 @@
-# Project Title
+# Project Title Sign Language for learning purpose
 
-This is a brief description of the project.
+This is the first fonctionalite of the project openai chatbot with sign language input and resposne # output # with sign language animation.
 
-## Example Image
+## Images
 
 ![Example Image](Img/Screenshot_25-7-2024_14410_localhost.jpeg)
 
@@ -10,10 +10,6 @@ This is a brief description of the project.
 
 ![Example Image](Img/Screenshot_25-7-2024_144234_localhost.jpeg)
 ![Example Image](Img/Screenshot_25-7-2024_144340_localhost.jpeg)
-## Installation
 
-Instructions for installing the project.
 
-## Usage
 
-Instructions for using the project.
